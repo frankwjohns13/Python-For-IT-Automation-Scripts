@@ -85,23 +85,25 @@ The overall goal is to improve network security and reliability through early de
 
   ## Script 2 - Ping devices, Determine status, Verify DNS
 
-  **Learning Objectives:**
-  - Import required modules
-  - Variables
-  - Open, read and display a CSV file
-  - Pings
-  - SSH
+  **Learning Objectives**
+- Ping network devices to determine reachability
+- Establish SSH connections to retrieve configuration data
+- Verify DNS settings against an expected value
+- Generate a clear status report
 
-  **Pseudocode**
-  1. Import required modules
-  2. Set variables
-  3. Define the path to the CSV file
-  4. Open the CSV file
-  5. Read each row
-  6. Ping the devices IP address
-  7. SSH into the device
-  8. Print the device name, status, and DNS settings
-  9. (Bonus) Format the output for readability
+**Pseudocode**
+1. Import required modules
+2. Define the expected DNS server and CSV file path
+3. Create a function to ping a device
+4. Create a function to SSH into a device and retrieve its current DNS setting
+5. Open and read the CSV file
+6. For each device:
+   - Skip devices with no management access
+   - Ping the device to check if it is reachable
+   - If reachable, retrieve the current DNS configuration via SSH
+   - Compare the DNS setting to the expected value
+   - Print the device name, IP address, and status
+7. Display a completion message
   
   <details>
   <summary><strong>Actual Script</strong></summary>
@@ -216,22 +218,138 @@ The overall goal is to improve network security and reliability through early de
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <details> <!-- Starts Actual Script -->
 <summary><strong>Actual Script</strong></summary>
 
 
 
-
 </details> <!-- Ends Actual Script -->
 
+
+
+
 ---
-
-
-
   
 </details> <!-- Ends Script 3 -->
 
 
+<details> <!-- Starts Script 4 -->
+<summary><strong>Script 4 - </strong></summary>
+
+## Script 4 - 
+
+
+
+
+<details> <!-- Starts Actual Script -->
+<summary><strong>Actual Script</strong></summary>
+
+
+
+</details> <!-- Ends Actual Script -->
+
+
+
+
+---
+  
+</details> <!-- Ends Script 4 -->
+
+
+<details> <!-- Starts Script 5 -->
+<summary><strong>Script 5 - </strong></summary>
+
+## Script 5 - 
+
+
+
+
+<details> <!-- Starts Actual Script -->
+<summary><strong>Actual Script</strong></summary>
+
+
+
+</details> <!-- Ends Actual Script -->
+
+
+
+
+---
+  
+</details> <!-- Ends Script 5 -->
+
+<details> <!-- Starts Script 6 -->
+<summary><strong>Script 6 - </strong></summary>
+
+## Script 6 - 
+
+
+
+
+<details> <!-- Starts Actual Script -->
+<summary><strong>Actual Script</strong></summary>
+
+
+
+</details> <!-- Ends Actual Script -->
+
+
+
+
+---
+  
+</details> <!-- Ends Script 6 -->
+
+
+<details> <!-- Starts Script 7 -->
+<summary><strong>Script 7 - </strong></summary>
+
+## Script 7 - 
+
+
+
+
+<details> <!-- Starts Actual Script -->
+<summary><strong>Actual Script</strong></summary>
+
+
+
+</details> <!-- Ends Actual Script -->
+
+
+
+
+---
+  
+</details> <!-- Ends Script 7 -->
 
 
 
@@ -249,13 +367,27 @@ The overall goal is to improve network security and reliability through early de
 
 
 
-</details> <!-- Ends Task 1 -->
+
+
+
 
 ---
 
+</details> <!-- Ends Task 1 -->
+
+
+<details>
+<summary><strong>Task 2: Proactive Monitoring and Prevention</strong></summary>
+  
 ## Task 2: Proactive Monitoring and Prevention
 
 
+
+
+
+
+
+</details> <!-- Ends Task 2 -->
 
 
 
