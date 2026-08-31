@@ -2,7 +2,7 @@
 
 This holds the python scripts I wrote for my class assignments. 
 
-One big thing to remember about Python, indents matter... a lot!
+One big thing to remember about Python, indents matter... **a lot**!
 
 ---
 
