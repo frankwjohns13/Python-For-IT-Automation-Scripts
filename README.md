@@ -4,10 +4,20 @@ This holds the python scripts I wrote for my class assignments.
 
 One big thing to remember about Python, indents matter... **a lot**!
 
+The way this is setup:
+- Tasks #
+  - Task Overview
+  - Task Scenario
+  - Problem
+  - Scripts
+    - Learning Objective of the script
+    - Pseudocode for the scrip layout
+    - The actual script (I have the collapsed so you can try it for yourself and check it with mine)
+    
 ---
 
 <details>
-<summary><strong>Task1: Incident Response and Remediation</strong></summary>
+<summary><strong>Task 1: Incident Response and Remediation</strong></summary>
 
 ## Task 1 – Incident Response and Remediation
 
@@ -657,11 +667,11 @@ except Exception as e:
   
 </details> <!-- Ends Script 7 -->
 
----
+
 
 </details> <!-- Ends Task 1 -->
 
-
+---
 
 
 
