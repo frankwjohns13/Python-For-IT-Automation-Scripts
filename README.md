@@ -420,69 +420,116 @@ print("Ticket creation process complete.")
 <details> <!-- Starts Actual Script -->
 <summary><strong>Actual Script</strong></summary>
 
-```Python
-# d1_manage_dns_service.py
-# D1 + D2: Check and restart the DNS service on DNS2 (10.10.10.20)
+```python
+# d1_d2_manage_dns_service_total.py
+# This script will complete the tasks of D1 & D2
 
-import paramiko                 # Used for ssh connections
-import time                     # Used for time stamps
 
-DNS_HOST = "10.10.10.20"        # DNS2 - the affected server
-USERNAME = "ubuntu"             # Never hard code a username in a script
-PASSWORD = "ubuntu"             # Never hard code a password in a script
+import os                   # Because I want to clear screen
+import csv                  # Used to read the csv file
+import paramiko             # Used for SSH
+import time					# Used for time stamping
+from pathlib import Path    # Used to get the location of the csv file
+
+
+# Path to the csv file
+csv_file = Path("network_devices.csv")
+
 
 # defines the ssh function
 def run_cmd(ssh, command):
     stdin, stdout, stderr = ssh.exec_command(command)
     return stdout.read().decode().strip()
 
-print("Connecting to DNS2 (10.10.10.20)...")
 
-# Make the ssh connection
-ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(DNS_HOST, username=USERNAME, password=PASSWORD)
-print("Connected successfully.\n")
-
-# ========== D1: Show the service is DOWN ==========
-print("=== D1: Checking DNS service status on DNS2 ===")
-
-# Check current status
-status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
-print(f"Current status: {status}")
-
-if status == "active":
-    print("Service is running. Stopping it to demonstrate the DOWN state...")
-    run_cmd(ssh, "sudo systemctl stop systemd-resolved")
-    time.sleep(1)
-    status = run_cmd(ssh, "systemctl is-active systemd-resolved")
-    print(f"Status after stopping: {status}")
-
-print("DNS service on DNS2 is DOWN.")
+# ===== Report Header =====
+os.system('clear')
+print("")
+print("=" * 50)
+print("DNS check and restart initiated.")
+print("=" * 50)
+print()
 
 
-# =====================================
-# ============= End of D1 =============
-# =====================================
-
-
-# ========== D2: Restart the service ==========
-print("\n=== D2: Restarting DNS service on DNS2 ===")
-run_cmd(ssh, "sudo systemctl restart systemd-resolved || sudo systemctl restart named || sudo systemctl restart bind9")
-time.sleep(2)
-
-status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
-print(f"Status after restart: {status}")
-
-if status == "active":
-    print("DNS service on DNS2 is now UP.")
-else:
-    print("Warning: DNS service may still be down.")
+# Read the csv file and find the DNS server names
+with open(csv_file, mode="r") as file:
+    reader = csv.DictReader(file)
     
+    
+    # Grab the device name, ip address, username, and password
+    for row in reader:
+        device_name = row["Device Name"]
+        device_ip = row["Device Address"]
+        device_user = row["Username"]
+        device_pw = row["Password"]
 
-ssh.close()
-print("\nConnection closed.")
+
+        # Check to see if the device is one of the DNS servers
+        if device_name in ["DNS1", "DNS2"]:
+            try:
+             
+             
+                # If it is, we need to ssh into the device
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh.connect(device_ip, username=device_user, password=device_pw)
+                print(f"Connected to {device_name}")
+
+
+                # Check status
+                print(f"Checking status of {device_name}...")
+                device_status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
+                print(f"{device_name}'s status: {device_status}")
+
+
+                # If the status is anything other than active
+                if device_status != "active":
+                    # We need to start the service back up
+                    print()
+                    print("=" * 50)
+                    print(f"Restarting DNS service on {device_name}")
+                    print("=" * 50)
+                    print()
+                    run_cmd(ssh, "sudo systemctl restart systemd-resolved || sudo systemctl restart named || sudo systemctl restart bind9")
+                    time.sleep(2)
+
+                    
+                    # Recheck status
+                    device_status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
+                    print(f"{device_name}'s status after restart: {device_status}")
+
+                    
+                    # Options... what do we do?
+                    if device_status == "active":
+                        print(f"DNS service on {device_name} is now UP.")
+                    else:
+                        print(f"Warning: DNS service may still be down.")
+                else:
+                    print(f"{device_name} is already running.")
+
+
+                # Closs SSH connection
+                ssh.close()
+                print("Connection closed.\n")
+
+            except Exception as e:
+                print(f"Failed to connect to {device_name}: {e}\n")
+
+
+# ===== Report Footer =====
+print("=" * 50)
+print("DNS check and restart completed.")
+print("=" * 50)
+print()
+
+# End of script
+
 ```
+
+
+
+
+<img width="840" height="785" alt="Restart DNS Services 2" src="https://github.com/user-attachments/assets/a61032c8-dfe2-49ed-b841-a75edcf8539a" />
 
 </details> <!-- Ends Actual Script -->
 
