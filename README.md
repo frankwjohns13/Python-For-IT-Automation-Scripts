@@ -542,6 +542,7 @@ print()
 
 ```
 
+<img width="462" height="514" alt="D1_D2_manage_dns_service" src="https://github.com/user-attachments/assets/93edffdd-3538-4d05-994a-3d85a61471fd" />
 
 
 ---
