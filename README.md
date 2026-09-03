@@ -478,7 +478,21 @@ with open(csv_file, mode="r") as file:
 
                 # Check status
                 print(f"Checking status of {device_name}...")
-                device_status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
+                # Try each service one at a time and stop at the first real result
+                device_status = run_cmd(ssh, """
+                if systemctl is-active --quiet systemd-resolved; then
+                    echo active
+                elif systemctl is-active --quiet named; then
+                    echo active
+                elif systemctl is-active --quiet bind9; then
+                    echo active
+                else
+                    echo inactive
+                fi
+                """)
+                
+                # Removed because it would get three inactive statuses.
+                # device_status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
                 print(f"{device_name}'s status: {device_status}")
 
 
@@ -492,7 +506,6 @@ with open(csv_file, mode="r") as file:
                     print()
                     run_cmd(ssh, "sudo systemctl restart systemd-resolved || sudo systemctl restart named || sudo systemctl restart bind9")
                     time.sleep(2)
-
                     
                     # Recheck status
                     device_status = run_cmd(ssh, "systemctl is-active systemd-resolved || systemctl is-active named || systemctl is-active bind9")
@@ -522,14 +535,16 @@ print("DNS check and restart completed.")
 print("=" * 50)
 print()
 
+
 # End of script
+
+
 
 ```
 
 
 
-
-<img width="840" height="785" alt="Restart DNS Services 2" src="https://github.com/user-attachments/assets/a61032c8-dfe2-49ed-b841-a75edcf8539a" />
+---
 
 </details> <!-- Ends Actual Script -->
 
