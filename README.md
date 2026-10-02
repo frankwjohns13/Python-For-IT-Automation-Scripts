@@ -22,23 +22,10 @@ The way this is setup:
 ## Task 1 – Incident Response and Remediation
 
 ### Introduction  
-In this task, you will act as a company's network administrator during a cybersecurity incident in which the
-internal Domain Name System (DNS) service is down and devices are resolving through a rogue DNS
-address. Your mission is to quickly identify the root cause, verify and correct configurations on impacted
-devices, and implement enduring safeguards to prevent recurrence. You will manage a GitLab-based project
-with working branches, develop Python scripts to enumerate devices, verify connectivity and DNS settings,
-automatically notify stakeholders, create remediation tickets, and restore the DNS service while ensuring all
-affected devices are properly reconfigured.
+Act as network administrator during a DNS outage where devices are using a rogue resolver. Identify the cause, fix affected hosts, notify stakeholders, open tickets, and restore the internal DNS service using Python automation in a GitLab workflow.
 
 ### Scenario  
-As the network administrator for your company, you are alerted to a cybersecurity incident involving a DNS
-service outage. The internal DNS service is currently down, and you discover that several network devices
-have been reconfigured to use an unauthorized, potentially malicious DNS address. Immediate action is
-required to restore proper DNS functionality and secure the network.  
-You are responsible for identifying the root cause of the DNS resolution issue and restoring normal
-operations. This includes investigating the source of the unauthorized DNS changes, verifying and correcting
-DNS configurations on all affected devices, and implementing immediate remediation steps to secure the
-network against further compromise.
+Internal DNS is down and several devices point to an unauthorized DNS address. Investigate the unauthorized changes, correct configurations, restore service, and lock down the network against further compromise.
 
 ### Problem Statement
 Design and implement a solution that:
