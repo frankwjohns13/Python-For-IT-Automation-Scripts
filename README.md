@@ -6,7 +6,7 @@ One big thing to remember about Python, indents matter... **a lot**!
 
 The way this is setup:
 - Tasks #
-  - Task Overview
+  - Task Introduction
   - Task Scenario
   - Problem
   - Scripts
@@ -21,20 +21,32 @@ The way this is setup:
 
 ## Task 1 – Incident Response and Remediation
 
-### Overview
-In this task, I continued in the role of a network administrator following a recent DNS service outage caused by unauthorized configuration changes. The goal was to design and implement a proactive monitoring solution that continuously checks DNS configurations and device status across the network.
+### Introduction  
+In this task, you will act as a company's network administrator during a cybersecurity incident in which the
+internal Domain Name System (DNS) service is down and devices are resolving through a rogue DNS
+address. Your mission is to quickly identify the root cause, verify and correct configurations on impacted
+devices, and implement enduring safeguards to prevent recurrence. You will manage a GitLab-based project
+with working branches, develop Python scripts to enumerate devices, verify connectivity and DNS settings,
+automatically notify stakeholders, create remediation tickets, and restore the DNS service while ensuring all
+affected devices are properly reconfigured.
 
-### Scenario
-After restoring normal DNS service, the focus shifted to preventing similar incidents. The objective was to detect unauthorized DNS changes or service disruptions early, before they could impact business operations.
+### Scenario  
+As the network administrator for your company, you are alerted to a cybersecurity incident involving a DNS
+service outage. The internal DNS service is currently down, and you discover that several network devices
+have been reconfigured to use an unauthorized, potentially malicious DNS address. Immediate action is
+required to restore proper DNS functionality and secure the network.  
+You are responsible for identifying the root cause of the DNS resolution issue and restoring normal
+operations. This includes investigating the source of the unauthorized DNS changes, verifying and correcting
+DNS configurations on all affected devices, and implementing immediate remediation steps to secure the
+network against further compromise.
 
 ### Problem Statement
 Design and implement a solution that:
-- Regularly monitors DNS configurations and device status
-- Automatically detects anomalies or unauthorized changes
-- Generates real-time alerts for stakeholders
-- Creates tickets when issues are found
+- Determine the source of the issue
+- Notify stakeholders and create ticket entries
+- Remediate the DNS service and affected devices
+- Notify stakeholders of the resolution
 
-The overall goal is to improve network security and reliability through early detection and rapid response.
 
 ---
 
@@ -338,7 +350,7 @@ The overall goal is to improve network security and reliability through early de
     
     # API details from the lab
     API_URL = "http://api.d522.wgu.internal:5000/api/tickets"
-    TOKEN = "vGkbXkGLqQSo7YLflp9DutuG8st4xdPPF7wnTcwB0FE"
+    TOKEN = "<REDACTED - lab only>"
     
     headers = {
         "Authorization": f"Bearer {TOKEN}",
@@ -615,9 +627,6 @@ The overall goal is to improve network security and reliability through early de
 
 </details> <!-- Ends Actual Script -->
 
-
-
-
 ---
   
 </details> <!-- Ends Script 6 -->
@@ -666,7 +675,7 @@ The overall goal is to improve network security and reliability through early de
   
   body = f"""Dear Stakeholders,
   
-  This is an automated notification to inform you that the DNS service issue and all related device compromises have been successfully resolved. The following devices were affected and have now be remediated:
+  This is an automated notification to inform you that the DNS service issue and all related device compromises have been successfully resolved. The following devices were affected and have now been remediated:
   
   API
   DB
@@ -676,7 +685,7 @@ The overall goal is to improve network security and reliability through early de
   SVR1
   SVR2
   
-  No further action is required at thhis time. if you have any questions or concerns, please contact the IT support team.
+  No further action is required at this time. if you have any questions or concerns, please contact the IT support team.
   
   Thank you for your attention.
   
@@ -687,7 +696,7 @@ The overall goal is to improve network security and reliability through early de
   # Create the email message
   message = MIMEText(body)
   message["Subject"] = subject
-  message["from"] = SENDER
+  message["From"] = SENDER
   message["To"] = RECIPIENT
   
   # Send the email
@@ -703,7 +712,8 @@ The overall goal is to improve network security and reliability through early de
 
 </details> <!-- Ends Actual Script -->
 
-  
+---
+
 </details> <!-- Ends Script 7 -->
 
 <details>
@@ -790,6 +800,19 @@ The overall goal is to improve network security and reliability through early de
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- 
 ****************************************************************
 ******************** This ends Task 1 Notes ********************
@@ -808,324 +831,66 @@ The overall goal is to improve network security and reliability through early de
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <details>
 <summary><strong>Task 2: Proactive Monitoring and Prevention</strong></summary>
   
 ## Task 2: Proactive Monitoring and Prevention
 
-I created a "Utility" script to handle a lot of the repetitive tasks and a "Menu" script as a easy way to run the required scripts. 
+### Introduction   
+In this task, you build continuous monitoring and automated response for the same lab network. Scripts detect unreachable devices, open tickets, watch for unauthorized DNS changes, remediate configurations, notify stakeholders, and log healthy DNS state.
+
+### Scenario  
+After the initial incident response, the organization needs ongoing visibility. Devices may drop offline, DHCP clients may appear, and DNS settings may be altered again. Automation must detect these conditions, notify the right people, create or update tickets, and restore expected DNS configuration where possible.
+
+### Problem Statement  
+
+**Design and implement solutions that:**
+- Back up DNS server configuration before changes
+- Enumerate devices from inventory (including resolved DHCP addresses)
+- Continuously check reachability and notify when devices are unavailable
+- Create helpdesk tickets for unavailable devices
+- Detect altered DNS, alert, remediate, and mark tickets resolved
+- Log when DNS is correct and the DNS-related service is active
 
 ---
 
 <details>
-<summary><strong>Utility Script</summary>
+<summary><strong>Script 1 - Back up DNS server</strong></summary>
 
-  This script handles: Reading the csv file, getting DHCP addresses, pining devices, opening an SSH connection, and clearing the screen.  
+## Script 1 - Backup DNS server
 
-  ```python
-  # network_utility.py
-  """
-  This script will just grab all the devices from the csv file and
-  adds the DHCP IP address for PC1-PC4
-  Then, return an array of devices.
-  *** This script has grown. It is now a utility script that is called from other scripts to do repetitive tasks. ***
-  """
-  
-  # ---------------------------------------
-  # Imports
-  # ---------------------------------------
-  import os                   # For my love of clear screen
-  import csv                  # Used to read the csv file
-  import subprocess           # Used for ping
-  import paramiko             # Used for SSH
-  from pathlib import Path    # Used to get the location of the csv file
-  
-  
-  # ---------------------------------------
-  # Constants
-  # ---------------------------------------
-  CSV_FILE = Path("network_devices.csv")
-  
-  
-  # ---------------------------------------
-  # Functions
-  # ---------------------------------------
-  # Pulls DHCP IP addresses
-  def get_dhcp_ips():
-      """Query the router for current DHCP leases and return a dict of PC names → IPs"""
-      dhcp_ips = {}
-  
-      try:
-          ssh = open_ssh("10.10.10.1", "vyos", "vyos")
-  
-          # Non-interactive VyOS operational command
-          cmd = "/opt/vyatta/bin/vyatta-op-cmd-wrapper show dhcp server leases"
-          stdin, stdout, stderr = ssh.exec_command(cmd)
-          output = stdout.read().decode()
-          err = stderr.read().decode()
-          ssh.close()
-  
-          if err.strip():
-              print(f"Warning (stderr): {err.strip()}")
-  
-          for line in output.splitlines():
-              line = line.strip()
-              if not line or "IP Address" in line or line.startswith("---"):
-                  continue
-  
-              parts = line.split()
-              if len(parts) < 2:
-                  continue
-  
-              ip = parts[0]
-              for token in parts:
-                  if token.lower() in ["pc1", "pc2", "pc3", "pc4"]:
-                      dhcp_ips[token.upper()] = ip
-                      break
-  
-      except Exception as e:
-          print(f"Warning: could not get DHCP leases: {e}")
-  
-      return dhcp_ips
-  
-  # ---------------------------------------
-  
-  # Get a list of devices and thier information
-  def get_devices(filepath):
-      # Known DHCP addresses discovered from the lab
-      # print("Reached the correct script.")   # Was added while trying to fix a bug. 
-      dhcp_ips = get_dhcp_ips()
-      
-      # Creates the variable to hold all the devices 
-      devices = []
-      
-      # Load device information from the csv file
-      with open(filepath, mode="r") as file:
-          reader = csv.DictReader(file)
-          
-          # Iterate through each row grabbing the information needed to ping / ssh
-          for row in reader:
-              name = row["Device Name"]
-              ip = row["Device Address"]
-              username = row["Username"]
-              password = row["Password"]
-              
-              # Checks to see if the device is on the list of DHCP addresses
-              if ip.upper() == "DHCP" and name in dhcp_ips:
-                  ip = dhcp_ips[name]
-          
-              devices.append({
-                  "name": name,
-                  "ip": ip,
-                  "username": username,
-                  "password": password
-              })
-      return devices  # Sends this array back to the caller.
-  
-  
-  # ---------------------------------------
-  # Ping a device and return the results to the calling script
-  def ping_device(ip):
-      """Returns True if the device responds to ping"""
-      if ip in ["None", "DHCP"]:
-          return False
-      try:
-          result = subprocess.run(
-              ["ping", "-c", "2", ip],
-              stdout=subprocess.DEVNULL,
-              stderr=subprocess.DEVNULL
-          )
-          return result.returncode == 0
-      except:
-          return False
-  
-  # ---------------------------------------
-  # Open an SSH tunnel and return that connection to the calling script
-  def open_ssh(ip, username, password, timeout=5):
-      """Create and return an SSH connection"""
-      ssh = paramiko.SSHClient()
-      ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(ip, username=username, password=password, timeout=timeout)
-      return ssh
-  
-  
-  
-  # ---------------------------------------
-  # Clear the screen based on operating system
-  def clear_screen():
-      """Clear the terminal screen (Works on Windows and Linux/Mac)"""
-      if os.name == "nt":
-          os.system("cls")
-      else:
-          os.system("clear")
-  
-  
-  
-  # End of utility_get_devices
+  **Learning Objectives:**
+  - Create a directory to save the backup
+  - Use SSH to connect to DNS servers and access the config file
+  - Save the config file to the backup directory named appropriately
 
+  **Pseudocode**
+  1) Create a directory for the backup files to be saved
+  2) Obtain DNS IP addresses, usernames, and passwords
+  3) Open an SSH connection to the each server in turn
+  4) Copy the config file
+  5) Save it with a .bak extension
+  6) Close SSH connection (repeat steps 2 - 6 for second server)
 
-  ```
-
-</details> <!-- Ends the Utility Script -->
-
----
-
-<details> 
-<summary><strong>Menu Script</strong></summary>
-
-  I created this menu script to run all the scripts required for class from one simple location.  
-  I did have to modify several scripts after making this one to meet looping requirements,  
-  consequently, this one may not work anymore. 
-
-  ```python
-  # menu.py
-  """
-  This script will provide the user with a menu of options to be chosen.
-  It will then call the script required to perform that task.
-  If I get crazy enough, I'll include a FULL run, which, in theory,
-      would get the devices, run a status check, send alerts, create tickets,
-      backup the DNS servers, correct DNS settings on affected devices, 
-      close the tickets, and notify stakeholders of the corrections... in theory anyway.
-  """
-  
-  # ---------------------------------------
-  # Imports
-  # ---------------------------------------
-  from network_utility import clear_screen
-  from b1_backup_dns_server import backup_dns_server
-  from c1_device_list import print_network_devices
-  from c2_device_availability import check_device_availability
-  from c3_ticket_generator import generate_ticket
-  from c4_altered_dns_email import generate_alert
-  from c5_dns_health_log import check_and_log_dns
-  # I will addd the rest as I create them. 
-  
-  
-  # ---------------------------------------
-  # Constants
-  # ---------------------------------------
-  
-  # ---------------------------------------
-  # Functions
-  # ---------------------------------------
-  
-  # Creates the menu
-  def show_menu():
-      print("=" * 60)
-      print(" Network Monitoring & Remediation Menu")
-      print("=" * 60)
-      print("1. B1 Backup DNS server configurations")
-      print("2. C1 List all network devices")
-      print("3. C2 Check device availability + send alerts")
-      print("4. C3 Create tickets for unavailable devices")
-      print("5. C4 Detect & correct altered DNS settings")
-      print("6. C5 DNS Health Log")
-      print("8. FULL RUN (all of the above)")
-      print("0. Exit")
-      print("=" * 60)
-  
-  # Full run options
-  def full_run():
-      """Run everything in sequence"""
-      print("\n=== Starting Full Run ===\n")
-      print("=" * 60)
-      print()
-      
-      print("B1. Backing up DNS Servers")
-      print("-" * 60)
-      backup_dns_server()
-      print()
-      
-      print("C1. Display Network Devices")
-      print("-" * 60)
-      print_network_devices()
-      print()
-      
-      print("C2. Checking availability")
-      print("-" * 60)
-      check_device_availability()
-      print()
-      
-      print("C3. Generating Help Tickets")
-      print("-" * 60)
-      generate_ticket()
-      print()
-     
-      print("C4. Fixing Issues and Sending Alerts")
-      print("-" * 60)
-      generate_alert()
-      print()
-  
-      print("C5 DNS Health Log")
-      print("-" * 60)
-      check_and_log_dns()
-      print()
-  
-      print("\n=== Full Run Complete ===")
-      
-  # The worker bee
-  def main():
-      while True:
-          clear_screen()
-          show_menu()
-  
-          choice = input("\nEnter your choice: ").strip()
-  
-          match choice:
-              case "1":
-                  clear_screen()
-                  backup_dns_server()
-              case "2":
-                  clear_screen()
-                  print_network_devices()
-              case "3":
-                  clear_screen()
-                  check_device_availability()
-              case "4":
-                  clear_screen()
-                  generate_ticket()
-              case "5":
-                  clear_screen()
-                  generate_alert()
-              case "6":
-                  clear_screen()
-                  check_and_log_dns()
-              case "8":
-                  clear_screen()
-                  full_run()
-              case "0":
-                  print("\n~ Goodbye.\n")
-                  break
-              case _:
-                  print("\nInvalid choice. Please try again.")
-  
-          input("\nPress Enter to return to the menu...")
-  
-  
-  
-  # ---------------------------------------
-  # Main
-  # ---------------------------------------
-  
-  if __name__ == "__main__":
-      main()
-  
-  
-  # ---------------------------------------
-  # End of script
-  # ---------------------------------------
-
-```
-</details> <!-- Ends Menu script -->
-
----
 
 <details>
-<summary><strong>Back up DNS server</strong></summary>
-
-  This script reads current DNS configuration and saves it to a backup.  
-  This was the first required script for the class
-
+<summary><strong>Actual Script</strong></summary>
+  
   ```python
   # b1_backup_dns_config.py
   # This script is going to be used to back up the current settings on the two dns servers.
@@ -1283,14 +1048,31 @@ I created a "Utility" script to handle a lot of the repetitive tasks and a "Menu
   # ---------------------------------------
 
 ```
+
+</details> <!-- Ends Actual Script -->
+
 </details> <!-- Ends back up DNS -->
 
 ---
 
 <details> 
-<summary><strong>Reads CSV File</strong></summary>
+<summary><strong>Script 2 - Read CSV File</strong></summary>
 
-Much like Task 1's script, just imporved
+## Script 2 - Read CSV File
+
+**Learning Objectives:**
+- Open and read from a .csv file
+- Dynamically add IP addresses for DHCP devices (PC1-PC4)
+
+**Pseudocode**
+1) Open and read .csv file
+2) SSH into the router
+3) Download IP table
+4) Parse IP table for PC1-PC4 devices
+5) Add IP address to the list
+
+<details>
+<summary><strong>Actual Script</strong></summary>
 
 ```python
   # c1_device_list.py
@@ -1347,15 +1129,34 @@ Much like Task 1's script, just imporved
   # ---------------------------------------
 ```
 
+</details> <!-- Ends Actual Script -->
+
 </details> <!-- Ends Read CSV scrip -->
 
 ---
 
 <details>
-<summary><strong>Checks Device Availability</strong></summary>
+<summary><strong>Script 3 - Check Device Availability</strong></summary>
 
-  This script pings each device to see if it can be reached.
+  ## Script 3 - Check Device Abailability
 
+  **Learning Objectives:**
+  - Continuously poll devices from inventory
+  - Use ICMP to determine reachability
+  - Send templated email when a device is unavailable
+
+**Pseudocode**
+1) Import modules and load device list
+2) Define email settings and check interval
+3) Loop until interrupted:
+   - For each device with a usable IP, ping
+   - If unreachable, send notification email
+   - Sleep for the configured interval
+4) On Ctrl_C, print how many scans completed
+
+<details>
+<summary><strong>Actual Script</strong></summary>
+  
   ```python
   # c2_device_availability.py
   
@@ -1487,21 +1288,41 @@ Much like Task 1's script, just imporved
       print("=" * 60)
   
   
-  
   # ---------------------------------------
   # End of script
   # ---------------------------------------
 
 ```
 
+</details> <!-- Ends Actual Script -->
+
+
 </details> <!-- Ends Availability script -->
 
 ---
 
 <details> 
-<summary><strong>Help Ticket</strong></summary>
+<summary><strong>Script 4 - Help Ticket</strong></summary>
 
-This script generates a help ticket for devices that are not reachable.
+## Script 4 - Help Ticket
+
+**Learning Objectives:**
+- Generate a help ticket
+- API POST
+- Skip devices without IPs
+
+**Pseudocode**
+1) Import modules and load device list
+2) Define help ticket settings and check interval
+3) Loop until interrupted:
+   - For each device with a usable IP, ping
+   - If unreachable, generate help ticket
+   - Sleep for the configured interval
+4) On Ctrl_C, print how many scans completed
+
+
+<details>
+<summary><strong>Actual Script</strong></summary>
 
 ```python
   # c3_ticket_generator.py
@@ -1525,7 +1346,7 @@ This script generates a help ticket for devices that are not reachable.
   # ---------------------------------------
   CSV_FILE = Path("/home/student/d522/network_devices.csv")
   API_URL = "http://api.d522.wgu.internal:5000/api/tickets"
-  TOKEN = "vGkbXkGLqQSo7YLflp9DutuG8st4xdPPF7wnTcwB0FE"
+  TOKEN = "<REDACTED - lab only>"
   INTERVAL = 30
   
   HEADERS = {
@@ -1621,14 +1442,39 @@ This script generates a help ticket for devices that are not reachable.
 
 ```
 
+</details> <!-- Ends Actual Script -->
+
 </details> <!-- Ends Ticket Generator -->
 
 ---
 
 <details> 
-<summary><strong>Email Alert</strong></summary>
+<summary><strong>Script 5 - Email Alert</strong></summary>
 
-This script generates an email alert for devices that have had their DNS altered. 
+## Script 5 - Email Alert
+
+**Learning Objectives:**
+- Checking DNS settings
+- Checking for unauthorized changes to DNS settings
+- Sending an email alert if settings have changed
+- Correct DNS settings on the affected devices
+
+**Pseudocode**
+1) Import modules and load device list
+2) Define email settings and check interval
+3) Loop until interrupted:
+   - For each device with a usable IP
+     - SSH into the device
+     - Compare DNS settings to expected settings
+     - Send notification email regarding alter DNS devices
+     - Set device to correct DNS setting
+     - Close SSH connection
+4) Sleep for the configured interval
+5) On Ctrl_C, print how many scans completed
+
+
+<details>
+<summary><strong>Actual Script</strong></summary>
 
 ```python
   # c4_altered_dns_email.py
@@ -1673,7 +1519,7 @@ This script generates an email alert for devices that have had their DNS altered
   RECIPIENT = "admin@d522.wgu.internal"
   
   API_URL = "http://api.d522.wgu.internal:5000/api/tickets"
-  TOKEN = "vGkbXkGLqQSo7YLflp9DutuG8st4xdPPF7wnTcwB0FE"
+  TOKEN = "<REDACTED - lab only>"
   HEADERS = {
       "Authorization": f"Bearer {TOKEN}",
       "Content-Type": "application/json"
@@ -1905,14 +1751,30 @@ This script generates an email alert for devices that have had their DNS altered
   # ---------------------------------------
 ```
 
+</details> <!-- Ends Actual Script -->
+
 </details> <!-- Ends Email Alert -->
 
 ---
 
 <details> 
-<summary><strong>Health Log</strong></summary>
+<summary><strong>Script 6 - Health Log</strong></summary>
 
-This script generates or adds to the health log for all devices that are not corrupted. 
+## Script 6 - Health Log
+
+**Learning Objectives:**
+- How to determine when a device is in a healthy status
+- How to create a log to log the status of devices that are healthy
+- How to add to that log during future checks
+
+**Pseudocode**
+1) Create a log titled dns_health
+2) Get a list of devices to check
+3) SSH into each device and check the DNS settings
+4) Log devices that match the expected DNS settings
+
+<details>
+<summary><strong>Actual Script</strong></summary>
 
 ```python
   # c5_dns_health_log.py
@@ -2085,7 +1947,341 @@ This script generates or adds to the health log for all devices that are not cor
   # ---------------------------------------
 ```
 
+</details> <!-- Ends Actual Script -->
+
 </details> <!-- Ends Health Log -->
+
+---
+
+<details>
+<summary><strong>Utility Script</summary>
+
+  This script handles: Reading the csv file, getting DHCP addresses, pining devices, opening an SSH connection, and clearing the screen.  
+  It is a script that grew from Task 1 `utility_get_devices` with DHCP lease lookup and SSH helper.
+
+  Learning Objectives: 
+  - How to create my own import script
+  - How to better reuse code
+  
+<details>
+<summary><strong>Actual Script</strong></summary> 
+  
+    ```python
+    # network_utility.py
+    """
+    This script will just grab all the devices from the csv file and
+    adds the DHCP IP address for PC1-PC4
+    Then, return an array of devices.
+    *** This script has grown. It is now a utility script that is called from other scripts to do repetitive tasks. ***
+    """
+    
+    # ---------------------------------------
+    # Imports
+    # ---------------------------------------
+    import os                   # For my love of clear screen
+    import csv                  # Used to read the csv file
+    import subprocess           # Used for ping
+    import paramiko             # Used for SSH
+    from pathlib import Path    # Used to get the location of the csv file
+    
+    
+    # ---------------------------------------
+    # Constants
+    # ---------------------------------------
+    CSV_FILE = Path("network_devices.csv")
+    
+    
+    # ---------------------------------------
+    # Functions
+    # ---------------------------------------
+    # Pulls DHCP IP addresses
+    def get_dhcp_ips():
+        """Query the router for current DHCP leases and return a dict of PC names → IPs"""
+        dhcp_ips = {}
+    
+        try:
+            ssh = open_ssh("10.10.10.1", "vyos", "vyos")
+    
+            # Non-interactive VyOS operational command
+            cmd = "/opt/vyatta/bin/vyatta-op-cmd-wrapper show dhcp server leases"
+            stdin, stdout, stderr = ssh.exec_command(cmd)
+            output = stdout.read().decode()
+            err = stderr.read().decode()
+            ssh.close()
+    
+            if err.strip():
+                print(f"Warning (stderr): {err.strip()}")
+    
+            for line in output.splitlines():
+                line = line.strip()
+                if not line or "IP Address" in line or line.startswith("---"):
+                    continue
+    
+                parts = line.split()
+                if len(parts) < 2:
+                    continue
+    
+                ip = parts[0]
+                for token in parts:
+                    if token.lower() in ["pc1", "pc2", "pc3", "pc4"]:
+                        dhcp_ips[token.upper()] = ip
+                        break
+    
+        except Exception as e:
+            print(f"Warning: could not get DHCP leases: {e}")
+    
+        return dhcp_ips
+    
+    # ---------------------------------------
+    
+    # Get a list of devices and thier information
+    def get_devices(filepath):
+        # Known DHCP addresses discovered from the lab
+        # print("Reached the correct script.")   # Was added while trying to fix a bug. 
+        dhcp_ips = get_dhcp_ips()
+        
+        # Creates the variable to hold all the devices 
+        devices = []
+        
+        # Load device information from the csv file
+        with open(filepath, mode="r") as file:
+            reader = csv.DictReader(file)
+            
+            # Iterate through each row grabbing the information needed to ping / ssh
+            for row in reader:
+                name = row["Device Name"]
+                ip = row["Device Address"]
+                username = row["Username"]
+                password = row["Password"]
+                
+                # Checks to see if the device is on the list of DHCP addresses
+                if ip.upper() == "DHCP" and name in dhcp_ips:
+                    ip = dhcp_ips[name]
+            
+                devices.append({
+                    "name": name,
+                    "ip": ip,
+                    "username": username,
+                    "password": password
+                })
+        return devices  # Sends this array back to the caller.
+    
+    
+    # ---------------------------------------
+    # Ping a device and return the results to the calling script
+    def ping_device(ip):
+        """Returns True if the device responds to ping"""
+        if ip in ["None", "DHCP"]:
+            return False
+        try:
+            result = subprocess.run(
+                ["ping", "-c", "2", ip],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            return result.returncode == 0
+        except:
+            return False
+    
+    # ---------------------------------------
+    # Open an SSH tunnel and return that connection to the calling script
+    def open_ssh(ip, username, password, timeout=5):
+        """Create and return an SSH connection"""
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip, username=username, password=password, timeout=timeout)
+        return ssh
+    
+    
+    
+    # ---------------------------------------
+    # Clear the screen based on operating system
+    def clear_screen():
+        """Clear the terminal screen (Works on Windows and Linux/Mac)"""
+        if os.name == "nt":
+            os.system("cls")
+        else:
+            os.system("clear")
+    
+    
+    
+    # End of utility_get_devices
+  
+  
+    ```
+</details> <!-- Ends actual script -->
+
+
+</details> <!-- Ends the Utility Script -->
+
+---
+
+
+<details> 
+<summary><strong>Menu Script</strong></summary>
+
+  I created this menu script to run all the scripts required for class from one simple location.  
+  I did have to modify several scripts after making this one to meet looping requirements,  
+  consequently, this one may not work anymore. 
+
+**Learning Objectives:**
+- Python's match / case
+- Accepting input from use
+- Validating choice
+
+<details>
+<summary><strong>Actual Script</strong></summary>
+
+  ```python
+  # menu.py
+  """
+  This script will provide the user with a menu of options to be chosen.
+  It will then call the script required to perform that task.
+  If I get crazy enough, I'll include a FULL run, which, in theory,
+      would get the devices, run a status check, send alerts, create tickets,
+      backup the DNS servers, correct DNS settings on affected devices, 
+      close the tickets, and notify stakeholders of the corrections... in theory anyway.
+  """
+  
+  # ---------------------------------------
+  # Imports
+  # ---------------------------------------
+  from network_utility import clear_screen
+  from b1_backup_dns_server import backup_dns_server
+  from c1_device_list import print_network_devices
+  from c2_device_availability import check_device_availability
+  from c3_ticket_generator import generate_ticket
+  from c4_altered_dns_email import generate_alert
+  from c5_dns_health_log import check_and_log_dns
+  # I will addd the rest as I create them. 
+  
+  
+  # ---------------------------------------
+  # Constants
+  # ---------------------------------------
+  
+  # ---------------------------------------
+  # Functions
+  # ---------------------------------------
+  
+  # Creates the menu
+  def show_menu():
+      print("=" * 60)
+      print(" Network Monitoring & Remediation Menu")
+      print("=" * 60)
+      print("1. B1 Backup DNS server configurations")
+      print("2. C1 List all network devices")
+      print("3. C2 Check device availability + send alerts")
+      print("4. C3 Create tickets for unavailable devices")
+      print("5. C4 Detect & correct altered DNS settings")
+      print("6. C5 DNS Health Log")
+      print("8. FULL RUN (all of the above)")
+      print("0. Exit")
+      print("=" * 60)
+  
+  # Full run options
+  def full_run():
+      """Run everything in sequence"""
+      print("\n=== Starting Full Run ===\n")
+      print("=" * 60)
+      print()
+      
+      print("B1. Backing up DNS Servers")
+      print("-" * 60)
+      backup_dns_server()
+      print()
+      
+      print("C1. Display Network Devices")
+      print("-" * 60)
+      print_network_devices()
+      print()
+      
+      print("C2. Checking availability")
+      print("-" * 60)
+      check_device_availability()
+      print()
+      
+      print("C3. Generating Help Tickets")
+      print("-" * 60)
+      generate_ticket()
+      print()
+     
+      print("C4. Fixing Issues and Sending Alerts")
+      print("-" * 60)
+      generate_alert()
+      print()
+  
+      print("C5 DNS Health Log")
+      print("-" * 60)
+      check_and_log_dns()
+      print()
+  
+      print("\n=== Full Run Complete ===")
+      
+  # The worker bee
+  def main():
+      while True:
+          clear_screen()
+          show_menu()
+  
+          choice = input("\nEnter your choice: ").strip()
+  
+          match choice:
+              case "1":
+                  clear_screen()
+                  backup_dns_server()
+              case "2":
+                  clear_screen()
+                  print_network_devices()
+              case "3":
+                  clear_screen()
+                  check_device_availability()
+              case "4":
+                  clear_screen()
+                  generate_ticket()
+              case "5":
+                  clear_screen()
+                  generate_alert()
+              case "6":
+                  clear_screen()
+                  check_and_log_dns()
+              case "8":
+                  clear_screen()
+                  full_run()
+              case "0":
+                  print("\n~ Goodbye.\n")
+                  break
+              case _:
+                  print("\nInvalid choice. Please try again.")
+  
+          input("\nPress Enter to return to the menu...")
+  
+  
+  
+  # ---------------------------------------
+  # Main
+  # ---------------------------------------
+  
+  if __name__ == "__main__":
+      main()
+  
+  
+  # ---------------------------------------
+  # End of script
+  # ---------------------------------------
+
+```
+</details> <!-- Ends Actual Script -->
+
+</details> <!-- Ends Menu script -->
+
+
+
+
+
+
+
+
 
 
 </details> <!-- Ends Task 2 -->
